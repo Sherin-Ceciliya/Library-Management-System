@@ -206,9 +206,9 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'librarian') {
 
             <div class="card">
                 <img src="./images/view_borrow.png" alt="View Borrowed Books">
-                <h3>View Borrowed Books</h3>
+                <h3>Return Books</h3>
                 <p>See all books currently borrowed by users and manage returns.</p>
-                <a href="#">Go</a>
+                <a href="return.php">Go</a>
             </div>
         </div>
     </div>

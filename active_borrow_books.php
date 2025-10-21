@@ -319,7 +319,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
                 <img src='https://cdn-icons-png.flaticon.com/512/4076/4076549.png'/>
                 <h3>No active borrowed books right now 📚</h3>
                 <p>“A room without books is like a body without a soul.”<br>
-                Go ahead, <a href='index.php#new-arrivals'>borrow your next adventure!</a></p>
+                Go ahead, <a href='search.php'>borrow your next adventure!</a></p>
               </div>";
     }
 
@@ -369,3 +369,4 @@ function filterTable() {
 
 </body>
 </html>
+

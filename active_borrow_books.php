@@ -44,7 +44,6 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
             font-weight: bold;
         }
 
-
         nav a {
             color: #fff;
             text-decoration: none;
@@ -94,6 +93,26 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
             background: #000;
             margin: 15px auto 0;
             border-radius: 2px;
+        }
+
+        /* ===== Search Box ===== */
+        .search-container {
+            margin-bottom: 25px;
+        }
+
+        .search-box {
+            padding: 10px 15px;
+            width: 60%;
+            border-radius: 6px;
+            border: 1px solid #ccc;
+            outline: none;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+
+        .search-box:focus {
+            border-color: #000;
+            box-shadow: 0 0 6px rgba(0,0,0,0.2);
         }
 
         /* ===== Table ===== */
@@ -250,6 +269,11 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
 <div class="content">
     <h1>Active Borrowed Books</h1>
 
+    <!-- Search Bar -->
+    <div class="search-container">
+        <input type="text" id="searchInput" class="search-box" placeholder="🔍 Search by Book Name or Author..." onkeyup="filterTable()">
+    </div>
+
     <?php
     $username = $_SESSION['username'];
 
@@ -266,7 +290,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     $result = $stmt->get_result();
 
     if ($result->num_rows > 0) {
-        echo "<table>";
+        echo "<table id='booksTable'>";
         echo "<tr><th>Book ID</th><th>Book Name</th><th>Author</th><th>Issue Date</th><th>Return Date</th><th>Fine (₹)</th></tr>";
 
         while ($row = $result->fetch_assoc()) {
@@ -306,28 +330,42 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
     <a href="user_dashboard.php" class="back-btn">← Back to Dashboard</a>
 </div>
 
- <!-- Footer -->
-    <footer>
-        <div class="footer-container">
-            <div class="footer-left">
-                <p><strong>Library Address:</strong></p>
-                <p>123 Library Street</p>
-                <p>City, State, ZIP</p>
-                <p>Email: info@library.com</p>
-                <p>Phone: +1 234 567 890</p>
-            </div>
-            <div class="footer-right">
-                <a href="index.php">Home</a>
-                <a href="index.php#new-arrivals">Catalog</a>
-                <a href="index.php#events">Events</a>
-                <a href="index.php#services">Services</a>
-                <a href="logout.php">Logout</a>
-            </div>
+<!-- Footer -->
+<footer>
+    <div class="footer-container">
+        <div class="footer-left">
+            <p><strong>Library Address:</strong></p>
+            <p>123 Library Street</p>
+            <p>City, State, ZIP</p>
+            <p>Email: info@library.com</p>
+            <p>Phone: +1 234 567 890</p>
         </div>
-        <div class="footer-bottom">
-            &copy; 2025 Library Management System
+        <div class="footer-right">
+            <a href="index.php">Home</a>
+            <a href="index.php#new-arrivals">Catalog</a>
+            <a href="index.php#events">Events</a>
+            <a href="index.php#services">Services</a>
+            <a href="logout.php">Logout</a>
         </div>
-    </footer>
+    </div>
+    <div class="footer-bottom">
+        &copy; 2025 Library Management System
+    </div>
+</footer>
+
+<!-- ===== JS Search Filter ===== -->
+<script>
+function filterTable() {
+    let input = document.getElementById("searchInput").value.toLowerCase();
+    let rows = document.querySelectorAll("#booksTable tr:not(:first-child)");
+
+    rows.forEach(row => {
+        let bookName = row.cells[1].innerText.toLowerCase();
+        let author = row.cells[2].innerText.toLowerCase();
+        row.style.display = (bookName.includes(input) || author.includes(input)) ? "" : "none";
+    });
+}
+</script>
 
 </body>
 </html>

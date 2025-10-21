@@ -189,7 +189,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
                 <img src="./images/book.png" alt="Search Book">
                 <h3>Search Book</h3>
                 <p>Find any book in our library catalog quickly and easily.</p>
-                <a href="#">Go</a>
+                <a href="search.php">Go</a>
             </div>
 
             <div class="card">

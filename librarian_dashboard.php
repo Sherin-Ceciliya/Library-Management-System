@@ -201,7 +201,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'librarian') {
                 <img src="./images/remove_book.png" alt="Remove Book">
                 <h3>Remove Book</h3>
                 <p>Remove books that are outdated or no longer available in the library.</p>
-                <a href="#">Go</a>
+                <a href="remove_book.php">Go</a>
             </div>
 
             <div class="card">

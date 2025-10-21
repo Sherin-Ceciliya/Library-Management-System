@@ -193,16 +193,16 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
             </div>
 
             <div class="card">
-                <img src="./images/book (1).png" alt="Borrow Book">
-                <h3>Borrow Book</h3>
-                <p>Borrow your favorite books with your library membership.</p>
-                <a href="#">Go</a>
+                <img src="./images/view_borrow.png" alt="View Borrowed Books">
+                <h3>View Borrowed Books</h3>
+                <p>Check books you have currently borrowed.</p>
+                <a href="active_borrow_books.php">Go</a>
             </div>
 
             <div class="card">
-                <img src="./images/return.png" alt="Return Book">
-                <h3>Return Book</h3>
-                <p>Return books you have borrowed and keep your account updated.</p>
+                <img src="./images/book (1).png" alt="Borrow Book">
+                <h3>Library Activity Log</h3>
+                <p>Track all your borrowed, returned, and reading activities in one place.</p>
                 <a href="#">Go</a>
             </div>
         </div>

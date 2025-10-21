@@ -187,7 +187,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'librarian') {
                 <img src="./images/add_book.png" alt="Add Book">
                 <h3>Add Book</h3>
                 <p>Add new books to the library catalog and manage inventory.</p>
-                <a href="#">Go</a>
+                <a href="add_book.php">Go</a>
             </div>
 
             <div class="card">

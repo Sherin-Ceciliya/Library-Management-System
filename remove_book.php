@@ -14,19 +14,25 @@ if ($conn->connect_error) {
 
 // Step 1: Fetch book details for confirmation
 if (isset($_POST['fetch'])) {
-    $isbn = trim($_POST['isbn']);
-    $title = trim($_POST['title']);
+    $book_id = trim($_POST['book_id']);
+    $name = trim($_POST['name']);
 
-    if (!empty($isbn)) {
-        $sql = "SELECT * FROM books WHERE isbn = ?";
+    if (!empty($book_id)) {
+        $sql = "SELECT b.book_id, b.name, d.author, d.copies_available, d.copies_in_library 
+                FROM books b 
+                JOIN book_details d ON b.name = d.name 
+                WHERE b.book_id = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $isbn);
-    } elseif (!empty($title)) {
-        $sql = "SELECT * FROM books WHERE title = ?";
+        $stmt->bind_param("i", $book_id);
+    } elseif (!empty($name)) {
+        $sql = "SELECT b.book_id, b.name, d.author, d.copies_available, d.copies_in_library 
+                FROM books b 
+                JOIN book_details d ON b.name = d.name 
+                WHERE b.name = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $title);
+        $stmt->bind_param("s", $name);
     } else {
-        $error = "Please enter either ISBN or Title.";
+        $error = "Please enter either Book ID or Name.";
     }
 
     if (!isset($error)) {
@@ -44,14 +50,23 @@ if (isset($_POST['fetch'])) {
 
 // Step 2: Delete book after confirmation
 if (isset($_POST['confirm'])) {
-    $isbn = trim($_POST['isbn']);
+    $book_id = trim($_POST['book_id']);
+    $name = trim($_POST['name']);
 
-    $sql = "DELETE FROM books WHERE isbn = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $isbn);
+    // Delete from book_details first
+    $sql1 = "DELETE FROM book_details WHERE name = ?";
+    $stmt1 = $conn->prepare($sql1);
+    $stmt1->bind_param("s", $name);
+    $stmt1->execute();
+    $stmt1->close();
 
-    if ($stmt->execute()) {
-        if ($stmt->affected_rows > 0) {
+    // Then delete from books
+    $sql2 = "DELETE FROM books WHERE book_id = ?";
+    $stmt2 = $conn->prepare($sql2);
+    $stmt2->bind_param("i", $book_id);
+
+    if ($stmt2->execute()) {
+        if ($stmt2->affected_rows > 0) {
             $success = "Book removed successfully.";
             // Automatically refresh back to initial form after 2 seconds
             header("Refresh:2; url=remove_book.php");
@@ -62,7 +77,7 @@ if (isset($_POST['confirm'])) {
         $error = "Error deleting book: " . $conn->error;
     }
 
-    $stmt->close();
+    $stmt2->close();
 }
 
 $conn->close();
@@ -117,11 +132,11 @@ $conn->close();
 
     <?php if(!isset($book) && !isset($success)): ?>
         <form method="POST" action="">
-            <label>Book ISBN:</label><br>
-            <input type="text" name="isbn" placeholder="Enter Book ISBN"><br>
+            <label>Book ID:</label><br>
+            <input type="text" name="book_id" placeholder="Enter Book ID"><br>
             <b>OR</b><br>
-            <label>Book Title:</label><br>
-            <input type="text" name="title" placeholder="Enter Book Title"><br>
+            <label>Book Name:</label><br>
+            <input type="text" name="name" placeholder="Enter Book Name"><br>
             <input type="submit" name="fetch" value="Fetch Book">
         </form>
     <?php endif; ?>
@@ -129,19 +144,85 @@ $conn->close();
     <?php if(isset($book)): ?>
         <h3>Confirm Deletion</h3>
         <table>
-            <tr><th>ISBN</th><td><?php echo htmlspecialchars($book['isbn']); ?></td></tr>
-            <tr><th>Title</th><td><?php echo htmlspecialchars($book['title']); ?></td></tr>
-            <tr><th>Author</th><td><?php echo htmlspecialchars($book['author']); ?></td></tr>
-            <tr><th>Category</th><td><?php echo htmlspecialchars($book['category']); ?></td></tr>
-            <tr><th>Quantity</th><td><?php echo htmlspecialchars($book['quantity']); ?></td></tr>
-        </table>
+    <thead>
+        <tr>
+            <th>Book ID</th>
+            <th>Name</th>
+            <th>Author</th>
+            <th>Copies Available</th>
+            <th>Copies in Library</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><?php echo htmlspecialchars($book['book_id']); ?></td>
+            <td><?php echo htmlspecialchars($book['name']); ?></td>
+            <td><?php echo htmlspecialchars($book['author']); ?></td>
+            <td><?php echo htmlspecialchars($book['copies_available']); ?></td>
+            <td><?php echo htmlspecialchars($book['copies_in_library']); ?></td>
+        </tr>
+    </tbody>
+</table>
+
         <form method="POST" action="">
-            <input type="hidden" name="isbn" value="<?php echo htmlspecialchars($book['isbn']); ?>">
+            <input type="hidden" name="book_id" value="<?php echo htmlspecialchars($book['book_id']); ?>">
+            <input type="hidden" name="name" value="<?php echo htmlspecialchars($book['name']); ?>">
             <input type="submit" name="confirm" value="Yes, Delete Book">
             <a href="remove_book.php" style="margin-left:15px; color:#007bff;">Cancel</a>
         </form>
     <?php endif; ?>
 </div>
+<style>
+    table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    margin: 25px 0;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    background-color: #ffffff;
+}
+
+th {
+    background: #0d47a1;
+    color: #ffffff;
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 16px;
+    letter-spacing: 0.3px;
+    width: 40%;
+}
+
+td {
+    background-color: #f9f9f9;
+    padding: 14px 20px;
+    font-size: 16px;
+    color: #333333;
+}
+
+tr:nth-child(even) td {
+    background-color: #f1f5ff;
+}
+
+tr:hover td {
+    background-color: #e3f2fd;
+    transition: background-color 0.3s ease;
+}
+
+table th:first-child {
+    border-top-left-radius: 12px;
+}
+
+table tr:last-child td:first-child {
+    border-bottom-left-radius: 12px;
+}
+
+table tr:last-child td:last-child {
+    border-bottom-right-radius: 12px;
+}
+
+    </style>
 
 <footer>
     <div class="footer-container">

@@ -194,7 +194,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'librarian') {
                 <img src="./images/update_book.png" alt="Update Book">
                 <h3>Update Book</h3>
                 <p>Edit details of existing books including title, author, and availability.</p>
-                <a href="#">Go</a>
+                <a href="update_book.php">Go</a>
             </div>
 
             <div class="card">

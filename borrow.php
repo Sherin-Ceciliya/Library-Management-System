@@ -46,7 +46,7 @@ $stmtBook->close();
 
 // Dates
 $issue_date = date('Y-m-d');
-$end_date = date('Y-m-d', strtotime('+15 days')); // renamed return_date to end_date
+$end_date = date('Y-m-d', strtotime('+30 days')); // renamed return_date to end_date
 
 // Handle borrow POST
 $success = false;

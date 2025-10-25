@@ -2,20 +2,20 @@
 // ======= BACKEND SECTION (PHP) =======
 if (isset($_GET['action'])) {
     header('Content-Type: application/json');
-    $servername = "localhost";
-    $username = "root";
-    $password = "";
-    $dbname = "lms_db";
+    $host = "localhost";
+    $user = "root"; 
+    $pass = ""; 
+    $db = "LMS";
 
-    $conn = new mysqli($servername, $username, $password, $dbname);
+    $conn = new mysqli($host, $user, $pass, $db);
     if ($conn->connect_error) {
         die(json_encode(["success" => false, "message" => "Database connection failed"]));
     }
 
-    // Search book by name
+    // --- SEARCH BOOK BY NAME ---
     if ($_GET['action'] === 'search' && isset($_GET['bookname'])) {
         $bookname = $_GET['bookname'];
-        $stmt = $conn->prepare("SELECT * FROM book WHERE bookname = ?");
+        $stmt = $conn->prepare("SELECT * FROM book_details WHERE name = ?");
         $stmt->bind_param("s", $bookname);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -29,24 +29,33 @@ if (isset($_GET['action'])) {
         $stmt->close();
     }
 
-    // Update quantity
+    // --- UPDATE QUANTITY AND INSERT INTO BOOKS TABLE ---
     if ($_GET['action'] === 'update') {
         $data = json_decode(file_get_contents("php://input"), true);
-        $bookId = $data['bookId'];
+        $bookname = $data['bookId']; // Using book name as key
         $addQty = $data['addQty'];
 
-        $stmt = $conn->prepare("SELECT quantity FROM book WHERE bookId = ?");
-        $stmt->bind_param("i", $bookId);
+        // Fetch current quantity
+        $stmt = $conn->prepare("SELECT copies_available FROM book_details WHERE name = ?");
+        $stmt->bind_param("s", $bookname);
         $stmt->execute();
         $result = $stmt->get_result();
 
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            $newQty = $row['quantity'] + $addQty;
+            $newQty = $row['copies_available'] + $addQty;
 
-            $update = $conn->prepare("UPDATE book SET quantity = ? WHERE bookId = ?");
-            $update->bind_param("ii", $newQty, $bookId);
+            // Update book_details table
+            $update = $conn->prepare("UPDATE book_details SET copies_available = ? WHERE name = ?");
+            $update->bind_param("is", $newQty, $bookname);
             $update->execute();
+
+            // Insert new copies into books table
+            $insert = $conn->prepare("INSERT INTO books (name) VALUES (?)");
+            for ($i = 0; $i < $addQty; $i++) {
+                $insert->bind_param("s", $bookname);
+                $insert->execute();
+            }
 
             echo json_encode(["success" => true, "newQuantity" => $newQty]);
         } else {
@@ -273,10 +282,10 @@ if (isset($_GET['action'])) {
 
     <div id="bookDetails" class="hidden">
       <h3>Book Details</h3>
-      <p><strong>Book ID:</strong> <span id="bookId"></span></p>
-      <p><strong>Book Name:</strong> <span id="bookName"></span></p>
+      <p><strong>Book Name:</strong> <span id="bookId"></span></p>
       <p><strong>Author:</strong> <span id="bookAuthor"></span></p>
-      <p><strong>Current Quantity:</strong> <span id="bookQty"></span></p>
+      <p><strong>Copies Available:</strong> <span id="bookQty"></span></p>
+      <p><strong>Copies in Library:</strong> <span id="bookLib"></span></p>
 
       <input type="number" id="addQty" placeholder="Enter quantity to add" min="1">
       <button onclick="updateQuantity()">Update Quantity</button>
@@ -325,10 +334,10 @@ if (isset($_GET['action'])) {
         .then(data => {
           if (data.success) {
             document.getElementById('bookDetails').classList.remove('hidden');
-            document.getElementById('bookId').textContent = data.book.bookId;
-            document.getElementById('bookName').textContent = data.book.bookname;
+            document.getElementById('bookId').textContent = data.book.name;
             document.getElementById('bookAuthor').textContent = data.book.author;
-            document.getElementById('bookQty').textContent = data.book.quantity;
+            document.getElementById('bookQty').textContent = data.book.copies_available;
+            document.getElementById('bookLib').textContent = data.book.copies_in_library;
           } else {
             msg.textContent = "Book not found!";
             msg.style.color = "red";

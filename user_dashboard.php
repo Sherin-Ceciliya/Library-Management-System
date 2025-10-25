@@ -203,7 +203,7 @@ if(!isset($_SESSION['username']) || $_SESSION['role'] != 'user') {
                 <img src="./images/book (1).png" alt="Borrow Book">
                 <h3>Library Activity Log</h3>
                 <p>Track all your borrowed, returned, and reading activities in one place.</p>
-                <a href="#">Go</a>
+                <a href="user_history.php">Go</a>
             </div>
         </div>
     </div>
